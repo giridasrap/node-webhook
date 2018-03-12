@@ -109,7 +109,7 @@ function processV1Request (req, res) {
       let text = "";
       for(var i=0; i<listOfUsers.length;i++){
         //console.log('S.no : '+listOfUsers[i].sNo+' ==> Id : '+listOfUsers[i].id+'\n');
-        text+= listOfUsers[i].sNo+'. '+listOfUsers[i].id+'   ';
+        text+= listOfUsers[i].sNo+'. '+listOfUsers[i].id+'\n';
       }
 
       responseToUser.speech = text+'. Can you give me the S No of the specific user that you are interested in?';
