@@ -49,6 +49,125 @@ function processV1Request (req, res) {
 
   const actionHandlers = {
 
+    /*
+      Intent:       welcome-user_id_available - no
+      Action:       welcome-user_id_available.welcome-user_id_available-no
+      Description:  User said no; he did not have User Id for Welcome message.
+      Output:       Send the user list back  
+    */
+    'welcome-user_id_available.welcome-user_id_available-no' : () => {
+      console.log("Intent: welcome-user_id_available - no");
+      console.log("Action: welcome-user_id_available.welcome-user_id_available-no");
+      let outputMessage = getAllUserIdsOutput();
+      res.json(outputMessage);
+      console.log('====================================');
+    },
+
+    /*
+      Intent:       userlist
+      Action:       userlist
+      Description:  User is asking for the list again.
+      Output:       Send the user list back  
+    */
+   'userlist' : () => {
+    console.log("Intent: userlist");
+    console.log("Action: userlist");
+    let outputMessage = getAllUserIdsOutput();
+    res.json(outputMessage);
+    console.log('====================================');
+  },
+
+    /*
+      Intent:       welcome-user_id_available - no - user-basic-details-with-sno
+      Action:       welcome-user_id_available.welcome-user_id_available-no.welcome-user_id_available-no-user-basic-details-with-sno
+      Description:  User said no; he did not have User Id for Welcome message. User list was provided and user chose a particular S No
+      Output:       Send the user list back. If invalid S No is provided send proper list back again  
+    */
+
+    'welcome-user_id_available.welcome-user_id_available-no.welcome-user_id_available-no-user-basic-details-with-sno' : () => {
+      console.log("Intent: welcome-user_id_available - no - user-basic-details-with-sno");
+      console.log("Action: welcome-user_id_available.welcome-user_id_available-no.welcome-user_id_available-no-user-basic-details-with-sno");
+      let outputMessage = getBasicDetailsWithSno(parameters['sno'],inputContexts);
+      res.json(outputMessage);
+      console.log('====================================');
+    },
+
+    /*
+      Intent:       userlist - user-basic-details-with-sno
+      Action:       userlist.userlist-user-basic-details-with-sno
+      Description:  User list was provided and user chose a particular S No
+      Output:       Send the user list back. If invalid S No is provided send proper list back again  
+    */
+
+   'userlist.userlist-user-basic-details-with-sno' : () => {
+    console.log("Intent: userlist - user-basic-details-with-sno");
+    console.log("Action: userlist.userlist-user-basic-details-with-sno");
+    let outputMessage = getBasicDetailsWithSno(parameters['sno'],inputContexts);
+    res.json(outputMessage);
+    console.log('====================================');
+  },
+
+    /*
+      Intent:       welcome-user_id_available - yes
+      Action:       welcome-user_id_available.welcome-user_id_available-yes
+      Description:  User said yes for Welcome message and supplied user id. 
+      Output:       For correct user id send the user details. If invalid user id is provided send proper list back again  
+    */
+
+    'welcome-user_id_available.welcome-user_id_available-yes' : () => {
+      console.log("Intent: welcome-user_id_available - yes");
+      console.log("Action: welcome-user_id_available.welcome-user_id_available-yes");
+      let outputMessage = getBasicDetailsWithUserId(parameters['user-id']);
+      res.json(outputMessage);
+      console.log('====================================');
+    },
+
+    /*
+      Intent:       user-basic-details-with-id
+      Action:       user-basic-details-with-id
+      Description:  User directly asked for details by supplied user id. 
+      Output:       For correct user id send the user details. If invalid user id is provided send proper list back again  
+    */
+
+   'user-basic-details-with-id' : () => {
+    console.log("user-basic-details-with-id");
+    console.log("Action: user-basic-details-with-id");
+    let outputMessage = getBasicDetailsWithUserId(parameters['user-id']);
+    res.json(outputMessage);
+    console.log('====================================');
+  },
+
+    /*
+      Intent:       user-additional-details-wo-userid
+      Action:       user-additional-details-wo-userid
+      Description:  User has asked for additional details. 
+      Output:       Based on user request, send designation/experience or both  
+    */
+
+   'user-additional-details-wo-userid' : () => {
+    console.log("Intent: user-additional-details-wo-userid");
+    console.log("Action: user-additional-details-wo-userid");
+    //console.log(JSON.stringify(inputContexts));
+    let userId = getUserIdFromInputContext(inputContexts)
+    let outputMessage = getAdditionalDetailsWithUserId(userId, inputContexts);
+    res.json(outputMessage);
+    console.log('====================================');
+  },
+
+    /*
+      Intent:       user-additional-details-with-userid
+      Action:       user-additional-details-with-userid
+      Description:  User has asked for additional details directly by specifying User Id. 
+      Output:       Based on user request, send designation/experience or both. If invalid User Id is sent, send the user list back.  
+    */
+
+   'user-additional-details-with-userid' : () => {
+    console.log("Intent: user-additional-details-with-userid");
+    console.log("Action: user-additional-details-with-userid");
+    let outputMessage = getAdditionalDetailsWithUserId(parameters['user-id'],inputContexts);
+    res.json(outputMessage);
+    console.log('====================================');
+   } /*,
     // The intent get basic detailshas been matched
     'input.getbasicdetails': () => {
 
@@ -75,9 +194,9 @@ function processV1Request (req, res) {
       console.log('====================================');
       console.log("Received action input.getadditionaldetails")
       console.log("Input context is "+JSON.stringify(inputContexts));
-      /*console.log("User id is "+inputContexts[0].parameters['id']);
+      console.log("User id is "+inputContexts[0].parameters['id']);
       console.log("User band is "+inputContexts[0].parameters['band']);
-      console.log("User experience is "+inputContexts[0].parameters['experience']);*/
+      console.log("User experience is "+inputContexts[0].parameters['experience']);
       const ID = inputContexts[0].parameters['id'];
       var details = getUserDetails(ID);
       if(details == 0){
@@ -106,13 +225,13 @@ function processV1Request (req, res) {
       console.log('====================================');
       console.log("Received action input.getuserlist");
       let listOfUsers = getAllUserIds();
-      let text = "";
+      let text = "Here are the user Ids that I can help you with.\n";
       for(var i=0; i<listOfUsers.length;i++){
         //console.log('S.no : '+listOfUsers[i].sNo+' ==> Id : '+listOfUsers[i].id+'\n');
         text+= listOfUsers[i].sNo+'. '+listOfUsers[i].id+'\n';
       }
 
-      responseToUser.speech = text+'. Can you give me the S No of the specific user that you are interested in?';
+      responseToUser.speech = text+'Can you give me the S No of the specific user that you are interested in?';
       responseToUser.displayText = text+'. Can you give me the S No of the specific user that you are interested in?';
       const CONTEXT_TEXT = [{'name': 'expecting_userlist', 'lifespan': 1, 'parameters': {'userlist': listOfUsers}}];
       responseToUser.contextOut = CONTEXT_TEXT;
@@ -138,7 +257,7 @@ function processV1Request (req, res) {
         responseToUser.contextOut = [{'name': 'expecting_id', 'lifespan': 1, 'parameters': {'id': details.id}}];
       }
       res.json(responseToUser);
-    }
+    }*/
   };
 
   // Run the proper handler function to handle the request from Dialogflow
@@ -219,4 +338,141 @@ function getUserIdFromSno(serialNo, inputContexts){
     }
   } 
   return 0;
+}
+
+function getAllUserIdsOutput() {
+  
+  let listOfUsers = getAllUserIds();
+  
+  //This will hold the outputs for speech and displayText
+  let responseToUser = {};
+  let text = "Here are the User Ids that I can help you with:\n";
+  for (var i = 0; i < listOfUsers.length; i++) {
+    //console.log('S.no : '+listOfUsers[i].sNo+' ==> Id : '+listOfUsers[i].id+'\n');
+    text += listOfUsers[i].sNo + '. ' + listOfUsers[i].id + '\n';
+  }
+
+  responseToUser.speech = text + 'Can you give me the S No (1 - '+listOfUsers.length+') of the specific user that you are interested in?';
+  responseToUser.displayText = text + '. Can you give me the S No of the specific user that you are interested in?';
+  const CONTEXT_TEXT = [{ 'name': 'expecting_userlist', 'lifespan': 1, 'parameters': { 'userlist': listOfUsers } }];
+  responseToUser.contextOut = CONTEXT_TEXT;
+  return responseToUser;
+}
+
+function getBasicDetailsWithSno(sno, inputContexts) {
+
+  let responseToUser = {};
+
+  //Check for user Id match
+  let userId = getUserIdFromSno(sno, inputContexts);
+  let details = getUserDetails(userId);
+
+  //match not found
+  if (details == 0) {
+    let listOfUsers = getAllUserIds();
+    let text = "Please choose a valid S No from the following:\n";
+    for (var i = 0; i < listOfUsers.length; i++) {
+      //console.log('S.no : '+listOfUsers[i].sNo+' ==> Id : '+listOfUsers[i].id+'\n');
+      text += listOfUsers[i].sNo + '. ' + listOfUsers[i].id + '\n';
+    }
+
+    responseToUser.speech = text + 'Can you give me the S No (1 - ' + listOfUsers.length + ') of the specific user that you are interested in?';
+    responseToUser.displayText = text + '. Can you give me the S No of the specific user that you are interested in?';
+    const CONTEXT_TEXT = [{ 'name': 'expecting_userlist', 'lifespan': 1, 'parameters': { 'userlist': listOfUsers } }, 
+                          { 'name': 'welcome-user_id_available-no-followup', 'lifespan': 1, 'parameters': {} },
+                          { 'name': 'user-id', 'lifespan': 0, 'parameters': {}} ];
+    responseToUser.contextOut = CONTEXT_TEXT;
+
+  } else {
+    responseToUser.speech = 'The user you are looking for is ' + details.name + '.\n Email Id of the user is ' + details.email + ' and is currently working in ' + details.project + '.\n Would you like to know about the designation or the total experience or both, additionally?';
+    responseToUser.displayText = 'The user you are looking for is ' + details.name + '.\n Email Id of the user is ' + details.email + ' and is currently working in ' + details.project + '.\n Would you like to know about the designation or the total experience or both, additionally?';
+    responseToUser.contextOut = [{ 'name': 'expecting_id', 'lifespan': 1, 'parameters': { 'user-id': details.id } }];
+  }
+
+  return responseToUser;
+}
+
+function getBasicDetailsWithUserId(userId) {
+  var details = getUserDetails(userId);
+
+  let responseToUser = {};
+  //match not found
+  if (details == 0) {
+    let listOfUsers = getAllUserIds();
+    let text = "Valid User Ids are given below:\n";
+    for (var i = 0; i < listOfUsers.length; i++) {
+      //console.log('S.no : '+listOfUsers[i].sNo+' ==> Id : '+listOfUsers[i].id+'\n');
+      text += listOfUsers[i].sNo + '. ' + listOfUsers[i].id + '\n';
+    }
+
+    responseToUser.speech = text + 'Can you give me the S No (1 - ' + listOfUsers.length + ') of the specific user that you are interested in?';
+    responseToUser.displayText = text + '. Can you give me the S No of the specific user that you are interested in?';
+    const CONTEXT_TEXT = [{ 'name': 'expecting_userlist', 'lifespan': 1, 'parameters': { 'userlist': listOfUsers } }, 
+                          { 'name': 'welcome-user_id_available-no-followup', 'lifespan': 1, 'parameters': {} },
+                          { 'name': 'expecting_id', 'lifespan': 0, 'parameters': {}} ];
+    responseToUser.contextOut = CONTEXT_TEXT;
+
+  } else {
+    responseToUser.speech = 'The user you are looking for is ' + details.name + '.\nEmail Id of the user is ' + details.email + ' and is currently working in ' + details.project + '.\n Would you like to know about the designation or the total experience or both, additionally?';
+    responseToUser.displayText = 'The user you are looking for is ' + details.name + '.\n Email Id of the user is ' + details.email + ' and is currently working in ' + details.project + '.\n Would you like to know about the designation or the total experience or both, additionally?';
+    //responseToUser.contextOut = [{ 'name': 'expecting_id', 'lifespan': 1, 'parameters': { 'id': details.id } }];
+  }
+
+  return responseToUser;
+}
+
+function getAdditionalDetailsWithUserId(userId, inputContexts) {
+  console.log("user id passed is "+userId)
+  let responseToUser = {};
+  //const ID = inputContexts[0].parameters['user-id'].id;
+  var details = getUserDetails(userId);
+  if (details == 0) {
+    let listOfUsers = getAllUserIds();
+    let text = "Valid User Ids are given below:\n";
+    for (var i = 0; i < listOfUsers.length; i++) {
+      //console.log('S.no : '+listOfUsers[i].sNo+' ==> Id : '+listOfUsers[i].id+'\n');
+      text += listOfUsers[i].sNo + '. ' + listOfUsers[i].id + '\n';
+    }
+
+    responseToUser.speech = text + 'Can you give me the S No (1 - ' + listOfUsers.length + ') of the specific user that you are interested in?';
+    responseToUser.displayText = text + '. Can you give me the S No of the specific user that you are interested in?';
+    const CONTEXT_TEXT = [{ 'name': 'expecting_userlist', 'lifespan': 1, 'parameters': { 'userlist': listOfUsers } }, 
+                          { 'name': 'welcome-user_id_available-no-followup', 'lifespan': 1, 'parameters': {} },
+                          { 'name': 'expecting_id', 'lifespan': 0, 'parameters': {}} ];
+    responseToUser.contextOut = CONTEXT_TEXT;
+
+  } else {
+    console.log("Matching id found, proceeding to set response")
+    let text = "";
+
+    if (inputContexts[0].parameters['both']) {
+
+      text+='The designation of '+details.name+' is '+details.band+'.\n';
+      text+='The total experience of '+details.name+' is '+details.experience+'.\n Is there anything else I can help you with?';
+
+    } else {
+      if (inputContexts[0].parameters['band']) {
+
+        text += 'The designation of ' + details.name + ' is ' + details.band + '.\n';
+      } if (inputContexts[0].parameters['experience']) {
+
+        text += 'The total experience of ' + details.name + ' is ' + details.experience + '.\n';
+      }
+      text += 'Is there anything else I can help you with?';
+    }
+    responseToUser.speech = text;
+    responseToUser.displayText = text;
+    //responseToUser.contextOut = [{ 'name': 'expecting_id', 'lifespan': 1, 'parameters': { 'id': details.id } }];
+  }
+  return responseToUser;
+}
+
+function getUserIdFromInputContext(inputContexts){
+  for(var i=0; i< inputContexts.length; i++){
+    if(inputContexts[i].name == 'expecting_id'){
+        console.log("matching user id found from context "+inputContexts[i].parameters['user-id']);
+      return inputContexts[i].parameters['user-id'];
+    }
+    //console.log(JSON.stringify(inputContexts[i]));
+  }
 }
